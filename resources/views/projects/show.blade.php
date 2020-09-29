@@ -9,4 +9,32 @@
 
     <a href="/projects">go back</a>
 
+    <hr>
+    <ul>
+
+    @forelse($project->tasks as $task)
+
+     <form method="POST" action="{{ $project->path() . '/tasks/' . $task->id}}">
+
+            @csrf
+            @method('PATCH')
+
+
+            <input value="{{ $task->body }}" type="text" name="body" />
+            <input value="{{ $task->body }}" type="checkbox" name="completed" onChange="this.form.submit()" />
+
+     </form>
+
+
+
+    @empty
+
+    @endforelse
+
+        <form action="{{ $project->path() . '/tasks'}}" method="POST">
+            @csrf
+            <input type="text" name="body" placeholder="begin adding tasks..." />
+        </form>
+    </ul>
+
 @endsection
