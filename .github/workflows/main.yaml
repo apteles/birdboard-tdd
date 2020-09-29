@@ -9,4 +9,5 @@ jobs:
             - uses: actions/checkout@v1
             - uses: ./.github/actions/composer
             - uses: ./.github/actions/setup-laravel
+            - uses: vendor/bin/php-cs-fixer fix --config=.php_cs.dist -v --dry-run --stop-on-violation --using-cache=no
             - run: ./vendor/bin/phpunit --testdox
