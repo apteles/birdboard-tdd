@@ -1,0 +1,18 @@
+name: ci
+on:
+  push:
+  pull_request:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install dependencies
+      uses: php-actions/composer@v2
+      with:
+        command: install
+        only_args: --no-interaction --classmap-authoritative
+    - name: Running Tests
+      uses: php-actions/phpunit@v8
+      with:
+        configuration: phpunit.xml
