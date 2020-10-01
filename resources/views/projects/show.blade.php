@@ -14,14 +14,14 @@
 
     @forelse($project->tasks as $task)
 
-     <form method="POST" action="{{ $project->path() . '/tasks/' . $task->id}}">
+     <form method="POST" action="{{ $task->path() }}">
 
             @csrf
             @method('PATCH')
 
 
             <input value="{{ $task->body }}" type="text" name="body" />
-            <input value="{{ $task->body }}" type="checkbox" name="completed" onChange="this.form.submit()" />
+            <input value="{{ $task->body }}" {{ $task->completed ? 'checked' : ''}} type="checkbox" name="completed" onChange="this.form.submit()" />
 
      </form>
 
