@@ -25,6 +25,7 @@
 
      </form>
 
+    <br/>
 
 
     @empty
@@ -33,8 +34,20 @@
 
         <form action="{{ $project->path() . '/tasks'}}" method="POST">
             @csrf
-            <input type="text" name="body" placeholder="begin adding tasks..." />
+            <input style="border:1px solid #ddd;" type="text" name="body" placeholder="begin adding tasks..." />
         </form>
     </ul>
+    <br/>
+    <div>
+        <form action="{{$project->path()}}" method="POST">
+            @csrf
+            @method('PATCH')
+         <textarea style="min-height: 200px;border:1px solid #ddd;" name="notes">
+            {{$project->notes}}
+         </textarea>
+         <br />
+         <button type="submit" class="button" style="color: #333;">save</button>
+        </form>
+    </div>
 
 @endsection
