@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use Tests\TestCase;
+use Tests\Setup\ProjectFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class ProjectTasksTest extends TestCase
@@ -11,10 +12,9 @@ class ProjectTasksTest extends TestCase
 
     public function test_a_project_can_have_tasks()
     {
-        $this->withoutExceptionHandling();
-        $this->signIn();
-
-        $project = factory('App\Project')->create(['owner_id' => auth()->id()]);
+        $project = app(ProjectFactory::class)
+                        ->ownedBy($this->signIn())
+                                ->create();
 
         $attribute = factory('App\Task')->raw();
 
@@ -37,25 +37,22 @@ class ProjectTasksTest extends TestCase
     {
         $this->signIn();
 
-        $project = factory('App\Project')->create();
-        $task = $project->addTask('test task');
+        $project = app(ProjectFactory::class)
+                            ->withTasks(1)
+                                ->create();
+        $this->patch($project->tasks[0]->path(), ['body' => 'test task (updated)'])->assertStatus(403);
 
-        $this->patch($task->path(), ['body' => 'test task (updated)'])->assertStatus(403);
-
-        $this->assertDatabaseHas('tasks', ['body' => 'test task']);
+        $this->assertDatabaseHas('tasks', ['body' => $project->tasks->first()->body]);
     }
 
     public function test_a_task_can_be_updated()
     {
-        $this->signIn();
+        $project = app(ProjectFactory::class)
+                        ->ownedBy($this->signIn())
+                            ->withTasks(1)
+                                ->create();
 
-        $project = auth()->user()->projects()->create(
-            factory('App\Project')->raw()
-        );
-
-        $task = $project->addTask('test task');
-
-        $this->patch($task->path(), [
+        $this->patch($project->tasks->first()->path(), [
             'body' => 'changed',
             'completed' => true
         ]);
@@ -65,9 +62,10 @@ class ProjectTasksTest extends TestCase
 
     public function test_a_project_requires_a_body()
     {
-        $this->signIn();
+        $project = app(ProjectFactory::class)
+                        ->ownedBy($this->signIn())
+                                ->create();
 
-        $project = factory('App\Project')->create(['owner_id' => auth()->id()]);
         $attribute = factory('App\Task')->raw(['body' => '']);
 
         $this->post($project->path() . '/tasks', $attribute)->assertSessionHasErrors('body');

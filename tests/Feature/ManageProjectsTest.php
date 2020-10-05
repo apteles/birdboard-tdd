@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Project;
 use Tests\TestCase;
+use Tests\Setup\ProjectFactory;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -23,7 +24,6 @@ class ManageProjectsTest extends TestCase
 
     public function test_a_user_can_create_a_project()
     {
-        $this->withoutExceptionHandling();
         $this->signIn();
 
         $this->get('/projects/create')->assertStatus(200);
@@ -38,8 +38,6 @@ class ManageProjectsTest extends TestCase
         $project = Project::where($attributes)->first();
         $response->assertRedirect($project->path());
 
-        $this->assertDatabaseHas('projects', $attributes);
-
         $this->get($project->path())
                         ->assertSee($attributes['title'])
                         ->assertSee($attributes['description'])->assertSee($attributes['notes']);
@@ -47,11 +45,7 @@ class ManageProjectsTest extends TestCase
 
     public function test_a_user_can_update_a_project()
     {
-        $this->signIn();
-
-        $this->withoutExceptionHandling();
-
-        $project = factory('App\Project')->create(['owner_id' => auth()->id()]);
+        $project = app(ProjectFactory::class)->withTasks(1)->ownedBy($this->signIn())->create();
 
         $this->patch($project->path(), ['notes' => 'changed'])->assertRedirect($project->path());
 
@@ -85,18 +79,17 @@ class ManageProjectsTest extends TestCase
     public function test_an_authenticated_user_cannot_update_the_project_of_others()
     {
         $this->signIn();
-        $project = factory('App\Project')->create();
+        $project = app(ProjectFactory::class)
+                            ->create();
 
         $this->patch($project->path(), [])->assertStatus(403);
     }
 
     public function test_a_user_can_view_their_project()
     {
-        $this->signIn();
-        $this->withoutExceptionHandling();
-
-        $project = factory('App\Project')->create(['owner_id' => auth()->id()]);
-
+        $project = app(ProjectFactory::class)
+                        ->ownedBy($this->signIn())
+                            ->create();
         $this->get($project->path())->assertSee($project->title)->assertSee($project->description);
     }
 }
